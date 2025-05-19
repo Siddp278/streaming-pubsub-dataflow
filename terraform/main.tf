@@ -1,3 +1,6 @@
+# Using terraform for simplicity and faster resource creation
+# Use terraform destroy after the project is completed.
+
 terraform {
   required_providers {
     google = {
@@ -16,6 +19,34 @@ provider "google" {
 resource "google_storage_bucket" "streaming_project_bucket" {
   name     = var.bucket_name
   location = var.region
+}
+
+resource "google_storage_bucket" "temp_bucket" {
+  name     = "${var.bucket_name}-temp"
+  location = var.region
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 1   # Automatically delete objects older than 1 day
+    }
+  }
+}
+
+resource "google_storage_bucket" "staging_bucket" {
+  name     = "${var.bucket_name}-staging"
+  location = var.region
+
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age = 1   # Automatically delete objects older than 1 day
+    }
+  }
 }
 
 resource "google_storage_bucket_object" "conversations_json" {
